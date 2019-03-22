@@ -2,9 +2,13 @@ import React, { Component } from "react";
 import "codemirror/lib/codemirror.css";
 import "tui-editor/dist/tui-editor.min.css";
 import "tui-editor/dist/tui-editor-contents.min.css";
-import { Editor, Viewer } from "@toast-ui/react-editor";
+import Editor from "tui-editor";
+
+// import table extension
+import "tui-editor/dist/tui-editor-extTable";
 
 var content = [
+  /*
   "![image](https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png)",
   "# Heading 1",
   "## Heading 2",
@@ -33,10 +37,23 @@ var content = [
   "horizontal line",
   "***",
   '`code`, *italic*, **bold**, ~~strikethrough~~, <span style="color:#e11d21">Red color</span>',
-  "|table|head|",
+  */
+  /*"|table|head|",
   "|---|---|",
-  "|table|body|"
+  "|table|body|",
+  "---",
+  "| @cols=2:merged |",
+  "| --- | --- |",
+  "| table | table |",
+  "---",
+  */
+  "```youtube",
+  "OxWqRo34UYI",
+  "```",
+  "---",
+  ":abc:"
 ].join("\n");
+console.log("content :", content);
 
 class TestTUIEditor extends Component {
   constructor(props) {
@@ -47,15 +64,80 @@ class TestTUIEditor extends Component {
     _._editor = null;
 
     _.state = {
-      isViewer: false,
-      content: content
+      isViewer: false
     };
+  }
 
-    _.editorRef = React.createRef();
-    _.viewerRef = React.createRef();
+  componentDidMount() {
+    const _ = this;
+
+    console.log("Editor :", Editor);
+
+    // set own extensions
+    Editor.defineExtension("emoticon", function() {
+      console.log("emoticon extension");
+
+      // preview
+      // convertor
+      // eventManager
+
+      // TODO: 가능하면 extension 으로 할 수 있으면 좋을 듯 하다.
+      // markdown 에 :abc: 를 넣는다.
+      // :abc: 는 위지윅 에디터에 표시될 때는 다른 태그로 치환되어야 한다.
+    });
+
+    // youtube extension
+    Editor.defineExtension("youtube", function() {
+      // add codeBlock 'youtube'
+
+      // runs while markdown-it transforms code block to HTML
+      Editor.codeBlockManager.setReplacer("youtube", function(youtubeId) {
+        // Indentify multiple code blocks
+        var wrapperId =
+          "yt" +
+          Math.random()
+            .toString(36)
+            .substr(2, 10);
+
+        // avoid sanitizing iframe tag
+        setTimeout(renderYoutube.bind(null, wrapperId, youtubeId), 0);
+
+        return '<div id="' + wrapperId + '"></div>';
+      });
+    });
+
+    _._editor = new Editor({
+      el: document.querySelector("#editor"),
+      initialEditType: "markdown",
+      previewStyle: "vertical",
+      height: "800px",
+      initialValue: content,
+      exts: [
+        "scrollSync",
+        "colorSyntax",
+        "uml",
+        "chart",
+        "mark",
+        "table",
+        "youtube",
+        "emoticon"
+      ]
+    });
+
+    console.log("_._editor :", _._editor);
+
+    function renderYoutube(wrapperId, youtubeId) {
+      var el = document.querySelector("#" + wrapperId);
+      el.innerHTML =
+        '<iframe width="420" height="315" src="https://www.youtube.com/embed/' +
+        youtubeId +
+        '"></iframe>';
+    }
   }
 
   getEditor = () => {
+    return "";
+    /*
     return (
       <Editor
         ref={this.editorRef}
@@ -63,28 +145,29 @@ class TestTUIEditor extends Component {
         previewStyle="vertical"
         height="600px"
         initialEditType="markdown"
-        /*
-        useCommandShortcut={true}
-        exts={[
-          {
-            name: "chart",
-            minWidth: 100,
-            maxWidth: 600,
-            minHeight: 100,
-            maxHeight: 300
-          },
-          "scrollSync",
-          "colorSyntax",
-          "uml",
-          "mark",
-          "table"
-        ]}
-        */
+        // useCommandShortcut={true}
+        // exts={[
+        //   {
+        //     name: "chart",
+        //     minWidth: 100,
+        //     maxWidth: 600,
+        //     minHeight: 100,
+        //     maxHeight: 300
+        //   },
+        //   "scrollSync",
+        //   "colorSyntax",
+        //   "uml",
+        //   "mark",
+        //   "table"
+        // ]}
       />
     );
+    */
   };
 
   getViewer = () => {
+    return "";
+    /*
     return (
       <Viewer
         ref={this.viewerRef}
@@ -92,28 +175,35 @@ class TestTUIEditor extends Component {
         previewStyle="vertical"
         height="600px"
         initialEditType="markdown"
-        /*
-        useCommandShortcut={true}
-        exts={[
-          {
-            name: "chart",
-            minWidth: 100,
-            maxWidth: 600,
-            minHeight: 100,
-            maxHeight: 300
-          },
-          "scrollSync",
-          "colorSyntax",
-          "uml",
-          "mark",
-          "table"
-        ]}
-        */
+        // useCommandShortcut={true}
+        // exts={[
+        //   {
+        //     name: "chart",
+        //     minWidth: 100,
+        //     maxWidth: 600,
+        //     minHeight: 100,
+        //     maxHeight: 300
+        //   },
+        //   "scrollSync",
+        //   "colorSyntax",
+        //   "uml",
+        //   "mark",
+        //   "table"
+        // ]}
       />
     );
+    */
   };
 
-  handleClick = () => {
+  toggleEditorViewer = () => {
+    const _ = this;
+
+    _.setState(function(prevState, props) {
+      return { isViewer: !prevState.isViewer };
+    });
+  };
+
+  printConsole = () => {
     const _ = this;
     // this.editorRef.current.getInstance().exec("Bold");
 
@@ -136,10 +226,32 @@ class TestTUIEditor extends Component {
       // public setValue(markdown: string): void;
     } else {
       // Editor
+
+      console.log("_._editor :", _._editor);
+
+      const preview = _._editor.preview;
+      preview.refresh("# title");
+
+      // console.log("preview.getHTML() :", preview.getHTML());
+      // preview.setHTML("<p>hello world</p>");
+      // preview.refresh(markdown) // .render(this.convertor.toHTMLWithCodeHightlight(markdown));
+      // preview.render(html) // eventManager.emit('previewBeforeHook', html); _$previewContent.html(html);
+
+      // convertor.initHtmlSanitizer
+      // convertor.getMarkdownitHighlightRenderer
+      // convertor.toHTML
+      // convertor.toHTMLWithCodeHightlight
+      // convertor.toMarkdown
+
+      // markdown input 시, preview 의 refresh 함수에서 convertor 의 toHTMLWithCodeHightlight 로 get html string
+      // 이후, eventManager.listen('convertorAfterMarkdownToHtmlConverted') 으로 html 전송.
+
+      /*
       const editor = this.editorRef.current.getInstance();
       console.log("editor.getHtml() :", editor.getHtml());
       console.log("editor.isViewer() :", editor.isViewer());
       console.log("editor.getMarkdown() :", editor.getMarkdown());
+      */
 
       // public addHook(type: string, handler: HandlerFunc): void;
       // public addWidget(selection: Range, node: Node, style: string, offset?: number): void;
@@ -183,12 +295,8 @@ class TestTUIEditor extends Component {
     }
   };
 
-  toggleEditorViewer = () => {
-    const _ = this;
-
-    _.setState(function(prevState, props) {
-      return { isViewer: !prevState.isViewer };
-    });
+  addEmoticon = () => {
+    console.log("addEm");
   };
 
   render() {
@@ -196,9 +304,12 @@ class TestTUIEditor extends Component {
 
     return (
       <div className="app">
-        {this.state.isViewer ? _.getViewer() : _.getEditor()}
-        <button onClick={_.handleClick}>console editor/viewer</button>
-        <button onClick={_.toggleEditorViewer}>toggle editor/viewer</button>
+        <div id="editor" />
+
+        {/*this.state.isViewer ? _.getViewer() : _.getEditor()*/}
+        <button onClick={_.toggleEditorViewer}>Toggle editor/viewer</button>
+        <button onClick={_.printConsole}>console editor/viewer</button>
+        <button onClick={_.addEmoticon}>Add emoticon</button>
       </div>
     );
   }
