@@ -8,11 +8,51 @@ import Editor from "tui-editor";
 import "tui-editor/dist/tui-editor-extTable";
 
 var content = [
-  "# h1",
+  "헬로월드",
+  "헬로월드 ",
+  "헬로월드  ",
+  "헬로월드\n",
+
+  "1\n",
+  "1\n\n",
+  "1\n\n3",
+  "1\n\n3\n",
+  "\n2",
+  "\n2\n",
+
+  "**헬***로*^월^드",
+  "**헬***로*^월^드 ",
+  "**헬***로*^월^드  ",
+  "**헬***로*^월^드\n",
+
+  "**헬***로*^월^~~드~~",
+  "**헬***로*^월^~~드~~ ",
+  "**헬***로*^월^~~드~~  ",
+  "**헬***로*^월^~~드~~\n",
+
+  "## 헬로**월드**",
+  "## 헬로**월드** ",
+  "## 헬로**월드**  ",
+  "## 헬로**월드**\n",
+
+  ":최고:",
+  ":최고:1",
+  "1:최고:",
+  "\n:최고:",
+  "\n:최고:\n",
+
+  // "1. 1"
+  // "1. 1\n"
+  // "1. 1\n    1. 1-1"
+  // "1. 1\n    1. 1-1\n        1. 1-1-1"
+  // "1. 1\n    1. 1-1\n        1. 1-1-1\n        2."
+  // "1. 1\n    1. 1-1\n        1. 1-1-1\n    2."
+  // "1. 1\n    1. 1-1\n        1. 1-1-1\n2."
+
+  "normal text",
   "**bold**",
   "*italic*",
-  "~~del~~"
-  /*
+  "~~del~~",
   "![image](https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png)",
   "# Heading 1",
   "## Heading 2",
@@ -54,8 +94,57 @@ var content = [
   "```",
   "---",
   ":abc:"
-  */
 ].join("\n");
+
+/*
+var content = [
+  "normal text",
+  "**bold**",
+  "*italic*",
+  "~~del~~",
+  "![image](https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png)",
+  "# Heading 1",
+  "## Heading 2",
+  "### Heading 3",
+  "#### Heading 4",
+  "##### Heading 5",
+  "###### Heading 6",
+  "    code block",
+  "```js",
+  'console.log("fenced code block");',
+  "```",
+  "<pre>**HTML block**</pre>",
+  "* list",
+  "    * list indented",
+  "1. ordered",
+  "2. list",
+  "    1. ordered list",
+  "    2. indented",
+  "",
+  "- [ ] task",
+  "- [x] list completed",
+  "",
+  "[link](https://nhnent.github.io/tui.editor/)",
+  "> block quote",
+  "---",
+  "horizontal line",
+  "***",
+  '`code`, *italic*, **bold**, ~~strikethrough~~, <span style="color:#e11d21">Red color</span>',
+  "|table|head|",
+  "|---|---|",
+  "|table|body|",
+  "---",
+  "| @cols=2:merged |",
+  "| --- | --- |",
+  "| table | table |",
+  "---",
+  "```youtube",
+  "OxWqRo34UYI",
+  "```",
+  "---",
+  ":abc:"
+].join("\n");
+*/
 console.log("content :", content);
 
 class TestTUIEditor extends Component {
@@ -239,8 +328,7 @@ class TestTUIEditor extends Component {
       // console.log("markdown :", markdown);
       // console.log("markdown.split('\\n') :", markdown.split("\n"));
       console.log(
-        "[Create][Get and Submit Markdown string => database] :",
-        markdown
+        `[Create][Get and Submit Markdown string => DB] : /${markdown}/`
       );
       // console.log("[Create][Html from Editor] :", editor.getHtml());
 
@@ -248,7 +336,7 @@ class TestTUIEditor extends Component {
       // View
       // --------
       const html = editor.convertor.toHTML(editor.getMarkdown());
-      console.log("[View][Get Html <= markdown string from database] :", html);
+      console.log(`[View][Get Html <= markdown string from DB] : /${html}/`);
 
       /*
       const preview = _._editor.preview;
@@ -266,10 +354,10 @@ class TestTUIEditor extends Component {
       // --------
       // Update (Edit)
       // --------
-      console.log("[Update][Markdown string from database :", markdown);
+      console.log(`[Update][Markdown string from DB : /${markdown}/`);
 
       window.setTimeout(() => {
-        console.log("[Update] Render Editor :", markdown);
+        console.log(`[Update] Render Editor : /${markdown}/`);
         editor.setMarkdown(markdown, true);
 
         /*
@@ -286,18 +374,15 @@ class TestTUIEditor extends Component {
         if (markdown === md) {
           // Create 단계의 markdown string 과 Update 단계의 markdown string 이 동일하다는 것을 증명한다.
           console.log(
-            "[Update] Equal. Created Markdown is equal to Updated Markdown"
+            `[Update] Equal. Created Markdown is equal to Updated Markdown`
           );
         } else {
           console.log(
-            "[Update] Not Equal. Created Markdown is not equal to Updated Markdown"
+            `[Update] Not Equal. Created Markdown is not equal to Updated Markdown`
           );
         }
 
-        console.log(
-          "[Update][Get and Submit Markdown string => database] :",
-          md
-        );
+        console.log(`[Update][Get and Submit Markdown string => DB] : /${md}/`);
       }, 1000);
 
       // preview.refresh("# title");
