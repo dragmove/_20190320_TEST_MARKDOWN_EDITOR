@@ -8,6 +8,10 @@ import Editor from "tui-editor";
 import "tui-editor/dist/tui-editor-extTable";
 
 var content = [
+  "# h1",
+  "**bold**",
+  "*italic*",
+  "~~del~~"
   /*
   "![image](https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png)",
   "# Heading 1",
@@ -37,8 +41,7 @@ var content = [
   "horizontal line",
   "***",
   '`code`, *italic*, **bold**, ~~strikethrough~~, <span style="color:#e11d21">Red color</span>',
-  */
-  /*"|table|head|",
+  "|table|head|",
   "|---|---|",
   "|table|body|",
   "---",
@@ -46,12 +49,12 @@ var content = [
   "| --- | --- |",
   "| table | table |",
   "---",
-  */
   "```youtube",
   "OxWqRo34UYI",
   "```",
   "---",
   ":abc:"
+  */
 ].join("\n");
 console.log("content :", content);
 
@@ -226,16 +229,82 @@ class TestTUIEditor extends Component {
       // public setValue(markdown: string): void;
     } else {
       // Editor
-
       console.log("_._editor :", _._editor);
+      const editor = _._editor;
 
+      // --------
+      // Create (New)
+      // --------
+      const markdown = editor.getMarkdown();
+      // console.log("markdown :", markdown);
+      // console.log("markdown.split('\\n') :", markdown.split("\n"));
+      console.log(
+        "[Create][Get and Submit Markdown string => database] :",
+        markdown
+      );
+      // console.log("[Create][Html from Editor] :", editor.getHtml());
+
+      // --------
+      // View
+      // --------
+      const html = editor.convertor.toHTML(editor.getMarkdown());
+      console.log("[View][Get Html <= markdown string from database] :", html);
+
+      /*
       const preview = _._editor.preview;
-      preview.refresh("# title");
 
+      // Customize Html
+      const html = editor.convertor.toHTML(markdown + "\n**view**");
+      console.log("[View][Html Customized] :", html);
+
+      window.setTimeout(() => {
+        console.log("[View][Render View from Customized Html]");
+        preview.render(html);
+      }, 1000);
+      */
+
+      // --------
+      // Update (Edit)
+      // --------
+      console.log("[Update][Markdown string from database :", markdown);
+
+      window.setTimeout(() => {
+        console.log("[Update] Render Editor :", markdown);
+        editor.setMarkdown(markdown, true);
+
+        /*
+        const customizedMarkdown = markdown + "\n__edit__";
+        console.log("[Update] Customized Markdown :", customizedMarkdown);
+
+        editor.setMarkdown(customizedMarkdown, true);
+        */
+      }, 500);
+
+      window.setTimeout(() => {
+        const md = editor.getMarkdown();
+
+        if (markdown === md) {
+          // Create 단계의 markdown string 과 Update 단계의 markdown string 이 동일하다는 것을 증명한다.
+          console.log(
+            "[Update] Equal. Created Markdown is equal to Updated Markdown"
+          );
+        } else {
+          console.log(
+            "[Update] Not Equal. Created Markdown is not equal to Updated Markdown"
+          );
+        }
+
+        console.log(
+          "[Update][Get and Submit Markdown string => database] :",
+          md
+        );
+      }, 1000);
+
+      // preview.refresh("# title");
       // console.log("preview.getHTML() :", preview.getHTML());
       // preview.setHTML("<p>hello world</p>");
       // preview.refresh(markdown) // .render(this.convertor.toHTMLWithCodeHightlight(markdown));
-      // preview.render(html) // eventManager.emit('previewBeforeHook', html); _$previewContent.html(html);
+      // preview.render(html); // eventManager.emit('previewBeforeHook', html); _$previewContent.html(html);
 
       // convertor.initHtmlSanitizer
       // convertor.getMarkdownitHighlightRenderer
