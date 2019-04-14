@@ -3,98 +3,13 @@ import "codemirror/lib/codemirror.css";
 import "tui-editor/dist/tui-editor.min.css";
 import "tui-editor/dist/tui-editor-contents.min.css";
 import Editor from "tui-editor";
+import { getLeftSpaces, getRightSpaces, separateCharsByRegex } from "./utils";
+import { size, trim, trimStart, trimEnd } from "lodash";
 
 // import table extension
 import "tui-editor/dist/tui-editor-extTable";
 
-var content = [
-  "헬로월드",
-  "헬로월드 ",
-  "헬로월드  ",
-  "헬로월드\n",
-
-  "1\n",
-  "1\n\n",
-  "1\n\n3",
-  "1\n\n3\n",
-  "\n2",
-  "\n2\n",
-
-  "**헬***로*^월^드",
-  "**헬***로*^월^드 ",
-  "**헬***로*^월^드  ",
-  "**헬***로*^월^드\n",
-
-  "**헬***로*^월^~~드~~",
-  "**헬***로*^월^~~드~~ ",
-  "**헬***로*^월^~~드~~  ",
-  "**헬***로*^월^~~드~~\n",
-
-  "## 헬로**월드**",
-  "## 헬로**월드** ",
-  "## 헬로**월드**  ",
-  "## 헬로**월드**\n",
-
-  ":최고:",
-  ":최고:1",
-  "1:최고:",
-  "\n:최고:",
-  "\n:최고:\n",
-
-  // "1. 1"
-  // "1. 1\n"
-  // "1. 1\n    1. 1-1"
-  // "1. 1\n    1. 1-1\n        1. 1-1-1"
-  // "1. 1\n    1. 1-1\n        1. 1-1-1\n        2."
-  // "1. 1\n    1. 1-1\n        1. 1-1-1\n    2."
-  // "1. 1\n    1. 1-1\n        1. 1-1-1\n2."
-
-  "normal text",
-  "**bold**",
-  "*italic*",
-  "~~del~~",
-  "![image](https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png)",
-  "# Heading 1",
-  "## Heading 2",
-  "### Heading 3",
-  "#### Heading 4",
-  "##### Heading 5",
-  "###### Heading 6",
-  "    code block",
-  "```js",
-  'console.log("fenced code block");',
-  "```",
-  "<pre>**HTML block**</pre>",
-  "* list",
-  "    * list indented",
-  "1. ordered",
-  "2. list",
-  "    1. ordered list",
-  "    2. indented",
-  "",
-  "- [ ] task",
-  "- [x] list completed",
-  "",
-  "[link](https://nhnent.github.io/tui.editor/)",
-  "> block quote",
-  "---",
-  "horizontal line",
-  "***",
-  '`code`, *italic*, **bold**, ~~strikethrough~~, <span style="color:#e11d21">Red color</span>',
-  "|table|head|",
-  "|---|---|",
-  "|table|body|",
-  "---",
-  "| @cols=2:merged |",
-  "| --- | --- |",
-  "| table | table |",
-  "---",
-  "```youtube",
-  "OxWqRo34UYI",
-  "```",
-  "---",
-  ":abc:"
-].join("\n");
+var content = ["hello , hello , hello , hello , hello , hello"].join("\n");
 
 /*
 var content = [
@@ -200,9 +115,9 @@ class TestTUIEditor extends Component {
 
     _._editor = new Editor({
       el: document.querySelector("#editor"),
-      initialEditType: "markdown",
+      initialEditType: "wysiwyg",
       previewStyle: "vertical",
-      height: "800px",
+      height: "500px",
       initialValue: content,
       exts: [
         "scrollSync",
@@ -317,6 +232,17 @@ class TestTUIEditor extends Component {
       // public setMarkdown(markdown: string): void;
       // public setValue(markdown: string): void;
     } else {
+      const isAllSpacesRegex = /^(\s+)$/;
+      const isAllEmptyOrAllSpacesRegex = /^(\s*)$/;
+      const leftSpacesRegex = /^(\s*)/;
+      const spacesRegex = /\s+/g;
+
+      // const boldItalicMarkdownRegex = /(\*{3}|_{3})([^*]+)\1/;
+      // const boldMarkdownRegex = /(\*{2}|_{2})([^*]+)\1/; // TODO:
+      // const italicMarkdownRegex = /(\*|_)(\s?)([^*]+)(\s?)(\1)/;
+      // const italicMarkdownRegex = /(\*|_)(\s?)([^\s][^*]+[^\s])(\s?)(\1)/g;
+      const italicMarkdownRegex = /(\*|_)([^*]+)(\*|_)/g;
+
       // Editor
       console.log("_._editor :", _._editor);
       const editor = _._editor;
@@ -324,19 +250,108 @@ class TestTUIEditor extends Component {
       // --------
       // Create (New)
       // --------
+      // 1. get markdown
       const markdown = editor.getMarkdown();
       // console.log("markdown :", markdown);
       // console.log("markdown.split('\\n') :", markdown.split("\n"));
-      console.log(
-        `[Create][Get and Submit Markdown string => DB] : /${markdown}/`
-      );
+      console.log(`[Create][1. get markdown] : /${markdown}/`);
       // console.log("[Create][Html from Editor] :", editor.getHtml());
+
+      // 2. markdown => mink.md
+      // TODO:
+      const mkRows = markdown.split("\n");
+      const afterMkRows = mkRows.map((row, i) => {
+        // let contents = "";
+        console.log("before mk row :", row);
+
+        // set any spaces to one space
+        row = row.replace(spacesRegex, " ");
+        console.log("spaces to one space :", row);
+
+        /*
+        if (boldMarkdownRegex.test(row)) {
+          // bold
+          contents = RegExp.$2;
+          console.log("bold contents :", contents);
+
+          // remove row, if there is '' or spaces
+          if (isAllSpacesRegex.test(contents)) return "";
+
+          // 컨좌|우공백 => * 외좌|우공백으로 이동
+          const leftSpaces = getLeftSpaces(contents);
+          const rightSpaces = getRightSpaces(contents);
+          row = `${leftSpaces}**${trim(contents)}**${rightSpaces}`;
+        } else 
+        */
+        if (italicMarkdownRegex.test(row)) {
+          console.log("match italic");
+
+          const chars = separateCharsByRegex(
+            row,
+            new RegExp(italicMarkdownRegex),
+            matchStr => {
+              const contents = matchStr.slice(1, -1), // *text* => text
+                leftSpaces = getLeftSpaces(contents),
+                rightSpaces = getRightSpaces(contents);
+
+              console.log(
+                "contents, leftSpaces.length, rightSpaces.length :",
+                contents,
+                leftSpaces.length,
+                rightSpaces.length
+              );
+
+              return `${leftSpaces}*${trim(contents)}*${rightSpaces}`;
+            }
+          );
+
+          row = chars.join("");
+        }
+
+        // reset any spaces to one space
+        row = row.replace(spacesRegex, " ");
+
+        console.log("after mk row :", row);
+        return row;
+      });
+
+      const minkMarkdown = afterMkRows.join("\n");
+      console.log(
+        `[Create][2. get mink.md. markdown => mink.md] : /${minkMarkdown}/`
+      );
 
       // --------
       // View
       // --------
-      const html = editor.convertor.toHTML(editor.getMarkdown());
-      console.log(`[View][Get Html <= markdown string from DB] : /${html}/`);
+      // mink.md => markdown
+
+      // markdown => html
+      const html = editor.convertor.toHTML(minkMarkdown); // markdownit.render
+      console.log(`[View][3. get html. mink.md => html] : /${html}/`);
+
+      const boldItalicRangeRegex = /(\*{3}|_{3}).*\1/;
+
+      const rows = html.split("\n");
+      const afterRows = rows.map((row, i) => {
+        console.log("before row :", row);
+
+        row = row
+          .replace(/&nbsp;/g, "") // &nbsp; => spaces
+          .replace(/\s{2,}/g, " ") // spaces => one space
+          .replace(/^\s+/, "") // remove first spaces
+          .replace(/\s+$/, "") // remove last spaces
+          .replace(/^(<[^>]*>)(\s+)(.*)/, "$1$3") // remove first spaces in tag
+          .replace(/(.*)(\s+)(<[^>]*>)$/, "$1$3"); // remove last spaces in tag
+
+        console.log("after row :", row);
+
+        return row;
+      });
+
+      const customHtml = afterRows.join("\n");
+      console.log("[View][4. html => custom html] :", customHtml);
+
+      return;
 
       /*
       const preview = _._editor.preview;
