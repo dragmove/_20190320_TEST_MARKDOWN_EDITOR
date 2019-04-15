@@ -7,6 +7,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 **~~*hello*~~**world  
 *~~**hello**~~*world  
 ~~***hello***~~world  
+  
+* **밍 크*** : bold+italic ?, ul ?  
+*헬**로***     ***밍*크** : regex fail.  
+
 
 ## Available Scripts
 
