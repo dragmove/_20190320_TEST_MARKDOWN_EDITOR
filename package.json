@@ -26,6 +26,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.11",
+    "xss": "^1.0.6"
   }
 }
