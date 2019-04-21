@@ -2,7 +2,9 @@ import React, { Component } from "react";
 import "codemirror/lib/codemirror.css";
 import "tui-editor/dist/tui-editor.min.css";
 import "tui-editor/dist/tui-editor-contents.min.css";
-import Editor from "tui-editor";
+// import Editor from "tui-editor";
+import Editor from "./lib/tui-editor/js/editor";
+
 import { getLeftSpaces, getRightSpaces, separateCharsByRegex } from "./utils";
 import { size, trim, trimStart, trimEnd } from "lodash";
 import xss from "xss";
