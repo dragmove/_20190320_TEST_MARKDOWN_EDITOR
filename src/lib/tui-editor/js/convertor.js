@@ -2,65 +2,71 @@
  * @fileoverview Convertor have responsible to convert markdown and html
  * @author NHN FE Development Lab <dl_javascript@nhn.com>
  */
-import $ from 'jquery';
-import util from 'tui-code-snippet';
-import MarkdownIt from 'markdown-it';
-import toMark from 'to-mark';
+import $ from "jquery";
+import util from "tui-code-snippet";
+import MarkdownIt from "markdown-it";
+import toMark from "to-mark";
 
-import htmlSanitizer from './htmlSanitizer';
-import taskList from './markdownItPlugins/markdownitTaskPlugin';
-import codeBlock from './markdownItPlugins/markdownitCodeBlockPlugin';
-import code from './markdownItPlugins/markdownitCodeRenderer';
-import blockQuote from './markdownItPlugins/markdownitBlockQuoteRenderer';
-import tableRenderer from './markdownItPlugins/markdownitTableRenderer';
-import htmlBlock from './markdownItPlugins/markdownitHtmlBlockRenderer';
-import codeBackticks from './markdownItPlugins/markdownitBackticksRenderer';
-import {linkAttribute} from './markdownItPlugins/markdownitInlinePlugin';
-import codeBlockManager from './codeBlockManager';
+import htmlSanitizer from "./htmlSanitizer";
+import underline from "./markdownItPlugins/markdownitUnderlinePlugin";
+import taskList from "./markdownItPlugins/markdownitTaskPlugin";
+import codeBlock from "./markdownItPlugins/markdownitCodeBlockPlugin";
+import code from "./markdownItPlugins/markdownitCodeRenderer";
+import blockQuote from "./markdownItPlugins/markdownitBlockQuoteRenderer";
+import tableRenderer from "./markdownItPlugins/markdownitTableRenderer";
+import htmlBlock from "./markdownItPlugins/markdownitHtmlBlockRenderer";
+import codeBackticks from "./markdownItPlugins/markdownitBackticksRenderer";
+import { linkAttribute } from "./markdownItPlugins/markdownitInlinePlugin";
+import codeBlockManager from "./codeBlockManager";
 
+// TODO: Add underline plugin
 const markdownitHighlight = new MarkdownIt({
   html: true,
   breaks: true,
-  quotes: '“”‘’',
-  langPrefix: 'lang-',
+  quotes: "“”‘’",
+  langPrefix: "lang-",
   highlight(codeText, type) {
     return codeBlockManager.createCodeBlockHtml(type, codeText);
   }
-});
+}).use(underline);
+
+// TODO: Add underline plugin
 const markdownit = new MarkdownIt({
   html: true,
   breaks: true,
-  quotes: '“”‘’',
-  langPrefix: 'lang-'
-});
+  quotes: "“”‘’",
+  langPrefix: "lang-"
+}).use(underline);
+
+console.log(markdownit.renderInline("^underline^ *emphasis*"));
 
 // markdownitHighlight
-markdownitHighlight.block.ruler.at('code', code);
-markdownitHighlight.block.ruler.at('table', tableRenderer, {
-  alt: ['paragraph', 'reference']
+markdownitHighlight.block.ruler.at("code", code);
+markdownitHighlight.block.ruler.at("table", tableRenderer, {
+  alt: ["paragraph", "reference"]
 });
-markdownitHighlight.block.ruler.at('blockquote', blockQuote, {
-  alt: ['paragraph', 'reference', 'blockquote', 'list']
+markdownitHighlight.block.ruler.at("blockquote", blockQuote, {
+  alt: ["paragraph", "reference", "blockquote", "list"]
 });
-markdownitHighlight.block.ruler.at('html_block', htmlBlock, {
-  alt: ['paragraph', 'reference', 'blockquote']
+markdownitHighlight.block.ruler.at("html_block", htmlBlock, {
+  alt: ["paragraph", "reference", "blockquote"]
 });
-markdownitHighlight.inline.ruler.at('backticks', codeBackticks);
+markdownitHighlight.inline.ruler.at("backticks", codeBackticks);
 markdownitHighlight.use(taskList);
 markdownitHighlight.use(codeBlock);
 
 // markdownit
-markdownit.block.ruler.at('code', code);
-markdownit.block.ruler.at('table', tableRenderer, {
-  alt: ['paragraph', 'reference']
+markdownit.block.ruler.at("code", code);
+markdownit.block.ruler.at("table", tableRenderer, {
+  alt: ["paragraph", "reference"]
 });
-markdownit.block.ruler.at('blockquote', blockQuote, {
-  alt: ['paragraph', 'reference', 'blockquote', 'list']
+markdownit.block.ruler.at("blockquote", blockQuote, {
+  alt: ["paragraph", "reference", "blockquote", "list"]
 });
-markdownit.block.ruler.at('html_block', htmlBlock, {
-  alt: ['paragraph', 'reference', 'blockquote']
+markdownit.block.ruler.at("html_block", htmlBlock, {
+  alt: ["paragraph", "reference", "blockquote"]
 });
-markdownit.inline.ruler.at('backticks', codeBackticks);
+markdownit.inline.ruler.at("backticks", codeBackticks);
 markdownit.use(taskList);
 markdownit.use(codeBlock);
 
@@ -87,9 +93,9 @@ class Convertor {
    */
   _markdownToHtmlWithCodeHighlight(markdown, env) {
     // eslint-disable-next-line
-        const onerrorStripeRegex = /(<img[^>]*)(onerror\s*=\s*[\"']?[^\"']*[\"']?)(.*)/i;
+    const onerrorStripeRegex = /(<img[^>]*)(onerror\s*=\s*[\"']?[^\"']*[\"']?)(.*)/i;
     while (onerrorStripeRegex.exec(markdown)) {
-      markdown = markdown.replace(onerrorStripeRegex, '$1$3');
+      markdown = markdown.replace(onerrorStripeRegex, "$1$3");
     }
 
     return markdownitHighlight.render(markdown, env);
@@ -105,12 +111,14 @@ class Convertor {
    * @returns {string} html text
    */
   _markdownToHtml(markdown, env) {
-    markdown = markdown.replace(/<br>/ig, '<br data-tomark-pass>');
+    markdown = markdown.replace(/<br>/gi, "<br data-tomark-pass>");
     // eslint-disable-next-line
-        const onerrorStripeRegex = /(<img[^>]*)(onerror\s*=\s*[\"']?[^\"']*[\"']?)(.*)/i;
+    const onerrorStripeRegex = /(<img[^>]*)(onerror\s*=\s*[\"']?[^\"']*[\"']?)(.*)/i;
     while (onerrorStripeRegex.exec(markdown)) {
-      markdown = markdown.replace(onerrorStripeRegex, '$1$3');
+      markdown = markdown.replace(onerrorStripeRegex, "$1$3");
     }
+
+    console.log("_markdownToHtml - markdown :", markdown);
 
     return markdownit.render(markdown, env);
   }
@@ -122,13 +130,15 @@ class Convertor {
    * @private
    */
   _removeBrToMarkPassAttributeInCode(renderedHTML) {
-    const $wrapperDiv = $('<div />');
+    const $wrapperDiv = $("<div />");
 
     $wrapperDiv.html(renderedHTML);
 
-    $wrapperDiv.find('code, pre').each((i, codeOrPre) => {
+    $wrapperDiv.find("code, pre").each((i, codeOrPre) => {
       const $code = $(codeOrPre);
-      $code.html($code.html().replace(/&lt;br data-tomark-pass&gt;/g, '&lt;br&gt;'));
+      $code.html(
+        $code.html().replace(/&lt;br data-tomark-pass&gt;/g, "&lt;br&gt;")
+      );
     });
 
     renderedHTML = $wrapperDiv.html();
@@ -146,7 +156,10 @@ class Convertor {
    */
   toHTMLWithCodeHightlight(markdown) {
     let html = this._markdownToHtmlWithCodeHighlight(markdown);
-    html = this.eventManager.emitReduce('convertorAfterMarkdownToHtmlConverted', html);
+    html = this.eventManager.emitReduce(
+      "convertorAfterMarkdownToHtmlConverted",
+      html
+    );
 
     return html;
   }
@@ -161,15 +174,21 @@ class Convertor {
    */
   toHTML(markdown) {
     let html = this._markdownToHtml(markdown);
+    console.log("toHTML - html :", html);
 
-    html = this.eventManager.emitReduce('convertorAfterMarkdownToHtmlConverted', html);
+    html = this.eventManager.emitReduce(
+      "convertorAfterMarkdownToHtmlConverted",
+      html
+    );
     html = this._removeBrToMarkPassAttributeInCode(html);
 
     return html;
   }
 
   initHtmlSanitizer() {
-    this.eventManager.listen('convertorAfterMarkdownToHtmlConverted', html => htmlSanitizer(html, true));
+    this.eventManager.listen("convertorAfterMarkdownToHtmlConverted", html =>
+      htmlSanitizer(html, true)
+    );
   }
 
   /**
@@ -199,42 +218,71 @@ class Convertor {
    * @returns {string} markdown text
    */
   toMarkdown(html, toMarkOptions) {
+    console.log("toMarkdown html :", html);
+
     const resultArray = [];
 
-    html = this.eventManager.emitReduce('convertorBeforeHtmlToMarkdownConverted', html);
+    html = this.eventManager.emitReduce(
+      "convertorBeforeHtmlToMarkdownConverted",
+      html
+    );
 
-    let markdown = toMark(this._appendAttributeForBrIfNeed(html), toMarkOptions);
+    let markdown = toMark(
+      this._appendAttributeForBrIfNeed(html),
+      toMarkOptions
+    );
 
-    markdown = this.eventManager.emitReduce('convertorAfterHtmlToMarkdownConverted', markdown);
+    console.log("toMarkdown markdown :", markdown);
 
-    util.forEach(markdown.split('\n'), (line, index) => {
-      const FIND_TABLE_RX = /^\|[^|]*\|/ig;
-      const FIND_CODE_RX = /`[^`]*<br>[^`]*`/ig;
+    // TODO: change <u> => underline markdown
+    // markdown = markdown.replace(/(<u>|<\/u>)/gi, "^");
+    // console.log("changed markdown :", markdown);
+
+    markdown = this.eventManager.emitReduce(
+      "convertorAfterHtmlToMarkdownConverted",
+      markdown
+    );
+
+    util.forEach(markdown.split("\n"), (line, index) => {
+      const FIND_TABLE_RX = /^\|[^|]*\|/gi;
+      const FIND_CODE_RX = /`[^`]*<br>[^`]*`/gi;
 
       if (!FIND_CODE_RX.test(line) && !FIND_TABLE_RX.test(line)) {
-        line = line.replace(/<br>/ig, '<br>\n');
+        line = line.replace(/<br>/gi, "<br>\n");
       }
       resultArray[index] = line;
     });
 
-    return resultArray.join('\n');
+    return resultArray.join("\n");
   }
 
   _appendAttributeForBrIfNeed(html) {
-    const FIND_BR_RX = /<br>/ig;
-    const FIND_DOUBLE_BR_RX = /<br \/><br \/>/ig;
-    const FIND_PASSING_AND_NORMAL_BR_RX = /<br data-tomark-pass \/><br \/>(.)/ig;
+    const FIND_BR_RX = /<br>/gi;
+    const FIND_DOUBLE_BR_RX = /<br \/><br \/>/gi;
+    const FIND_PASSING_AND_NORMAL_BR_RX = /<br data-tomark-pass \/><br \/>(.)/gi;
     const FIRST_TWO_BRS_BEFORE_RX = /([^>]|<\/a>|<\/code>|<\/span>|<\/b>|<\/i>|<\/s>|<img [^>]*>)/;
     const TWO_BRS_RX = /<br data-tomark-pass \/><br data-tomark-pass \/>/;
-    const FIND_FIRST_TWO_BRS_RX = new RegExp(FIRST_TWO_BRS_BEFORE_RX.source + TWO_BRS_RX.source, 'g');
-    const FIND_ATTRI_WITH_EMTPY_STR_RX = /<br data-tomark-pass="">/ig;
+    const FIND_FIRST_TWO_BRS_RX = new RegExp(
+      FIRST_TWO_BRS_BEFORE_RX.source + TWO_BRS_RX.source,
+      "g"
+    );
+    const FIND_ATTRI_WITH_EMTPY_STR_RX = /<br data-tomark-pass="">/gi;
 
-    html = html.replace(FIND_BR_RX, '<br />');
-    html = html.replace(FIND_DOUBLE_BR_RX, '<br data-tomark-pass /><br data-tomark-pass />');
-    html = html.replace(FIND_ATTRI_WITH_EMTPY_STR_RX, '<br data-tomark-pass />');
+    html = html.replace(FIND_BR_RX, "<br />");
+    html = html.replace(
+      FIND_DOUBLE_BR_RX,
+      "<br data-tomark-pass /><br data-tomark-pass />"
+    );
+    html = html.replace(
+      FIND_ATTRI_WITH_EMTPY_STR_RX,
+      "<br data-tomark-pass />"
+    );
 
-    html = html.replace(FIND_PASSING_AND_NORMAL_BR_RX, '<br data-tomark-pass /><br data-tomark-pass />$1');
-    html = html.replace(FIND_FIRST_TWO_BRS_RX, '$1<br /><br />');
+    html = html.replace(
+      FIND_PASSING_AND_NORMAL_BR_RX,
+      "<br data-tomark-pass /><br data-tomark-pass />$1"
+    );
+    html = html.replace(FIND_FIRST_TWO_BRS_RX, "$1<br /><br />");
 
     return html;
   }

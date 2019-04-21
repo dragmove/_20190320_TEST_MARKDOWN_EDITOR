@@ -63,6 +63,9 @@ var content = [
 */
 
 var content = [
+  "hello world"
+
+  /*
   'javascript: window.alert("xss");', // 일반 텍스트 // xxx
 
   "![image](https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png)", // <img src="https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png" alt="image"> // xxx
@@ -88,6 +91,7 @@ var content = [
   `<a href="https://www.google.com">google</a>`,
   `<a href="https://www.google.com" onerror="">google</a>`,
   `<a href="https://www.google.com" onload="">google</a>`
+  */
 
   /*
   "test 입니다.",
