@@ -196,6 +196,7 @@ class TestTUIEditor extends Component {
       initialValue: content,
       toolbarItems: [
         "heading",
+        "underline", // TODO: Add custom underline
         "bold",
         "italic"
         // 'strike',

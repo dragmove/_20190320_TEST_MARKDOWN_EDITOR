@@ -45,6 +45,7 @@ import mdCode from "./markdownCommands/code";
 import mdCodeBlock from "./markdownCommands/codeBlock";
 
 // wysiwyg Commands
+import wwUnderline from "./wysiwygCommands/underline";
 import wwBold from "./wysiwygCommands/bold";
 import wwItalic from "./wysiwygCommands/italic";
 import wwStrike from "./wysiwygCommands/strike";
@@ -336,6 +337,7 @@ class ToastUIEditor {
     this.addCommand(mdCodeBlock);
     this.addCommand(mdStrike);
 
+    this.addCommand(wwUnderline);
     this.addCommand(wwBold);
     this.addCommand(wwItalic);
     this.addCommand(wwBlockquote);
