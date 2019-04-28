@@ -159,6 +159,7 @@ class ToastUIEditor {
         usageStatistics: true,
         toolbarItems: [
           "heading",
+          "underline",
           "bold",
           "italic",
           "strike",
