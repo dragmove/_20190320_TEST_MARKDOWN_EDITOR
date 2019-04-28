@@ -63,14 +63,18 @@ var content = [
 */
 
 var content = [
-  "hello world"
+  "hello world",
 
-  /*
-  'javascript: window.alert("xss");', // 일반 텍스트 // xxx
+  // 일반 텍스트 // no issue
+  'javascript: window.alert("xss");',
 
+  // 일반 이미지 // no issue
   "![image](https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png)", // <img src="https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png" alt="image"> // xxx
+
   "![image](javascript:window.alert('xss');)", // TUI Convertor 에서 변환되지 않는다. // xxx
-  "![image](window.alert('xss');)", // <img src="window.alert('xss');" alt="image"> // src 제거
+
+  "![image](window.alert('xss');)" // <img src="window.alert('xss');" alt="image"> // src 제거
+  /*
 
   '<img src="https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png">', // <img src="https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png" alt=""> // xxx
   '<img src="https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png" onload="" onerror="">',
@@ -316,6 +320,168 @@ class TestTUIEditor extends Component {
     const _ = this;
     // this.editorRef.current.getInstance().exec("Bold");
 
+    const testHtml = `
+    @ 일반 xss issues
+    // style 속성 제거 처리 방어 // 확인 완료
+    <div style="width: expression(alert('xss'));"> 
+    <div style="background-image: url(javascript:window.alert('xss'));">
+
+    // html entity 인코딩. 안전하지 않은 속성의 철저한 확인. // 확인 완료
+    <input type="text" value="javascript:window.alert('xss');">
+    <input type="image" src="#">
+
+    // style 속성 값의 javascript 처리 // style 속성 제거 확인 완료
+    <div style="background-image:url(javascript:window.alert(document.cookie))">
+
+    // a href 속성 값의 http, https 이외의 설정 제거 확인. // 확인 완료
+    <a href="ftp:/doc">click me</a>
+    <a href="file:/doc">click me</a>
+    <a href="javascript:window.alert('xss');">click me</a>
+    <a href="http://naver.com">click me</a>
+    <a href="https://www.google.com">click me</a>
+
+    // 일반 iframe 의 src 설정 처리 // 확인 완료
+    <iframe src="https://www.google.com" width="0" height="0" frameborder="0"></iframe>
+
+    // 일반 text // 변경 없음. 확인 완료
+    javascript: window.alert('xss'); 
+
+    // onerror 속성 처리 // 제거 확인 완료
+    <img src="#" class="emoticon_small_size" alt=":한숨:" onerror="window.alert('xss')">
+
+    // 존재하지 않는 속성 처리 // 제거 확인 완료
+    <img src="#" class="emoticon_small_size" alt=":한숨:" oncopy="window.alert('xss')"> 
+
+    // 존재하지 않는 태그, 속성 처리 // escape 처리 확인 완료
+    <ruby oncopy="window.alert('xss');">ruby</ruby>
+
+    // script 태그 처리 // escape 처리 확인 완료
+    <script>window.alert('xss');</script>
+
+    // script 태그 xss javascript file injection 처리 // escape 처리 완료
+    <script src="http://xss.com/xss.js"></script>
+
+    // pre 태그 내 script 태그 처리 // escape 처리 확인 완료
+    <pre><script>window.alert('xss');</script></pre>
+
+    // frameset 태그 처리 // escape 처리 확인 완료
+    <frameset><frame src="#"></frameset>
+
+    // table 태그 처리 // table 속성 제거 처리 확인 완료
+    <table background="javascript:window.alert('xss');"></table>
+
+    @ 태그
+    // span 태그의 .text__tag 속성 처리 // 정상 출력 확인
+    <span class="text__tag">#vuild</span>
+
+    @ 멘션
+    // span 태그의 .text__mention class 값, data 값 처리 // 정상 출력 확인
+    <span class="text__mention" data="[object Object]">@vuild</span>
+
+    @ 링크
+    // a 태그의 .text__message-link class 값, href 값, target 값 처리 // 정상 출력 확인
+    <a class="text__message-link" href="https://www.google.com" target="_blank">https://www.google.com</a>
+
+    // a 태그의 href 속성 값의 javascript 처리 (href 제거) // href 속성 제거 확인
+    <a class="text__message-link" href="javascript:window.alert('xss');" target="_blank">https://www.xss.com</a>
+
+    // a 태그의 href 에 설정된 url 의 parameter 값 escape 처리 // 확인 완료
+    <a class="text__message-link" href="https://www.google.com?_name=foo&job=bar&<company>=google" target="_blank">https://www.google.com</a>
+
+    @ 이모티콘
+    // img 태그의 src, class, alt 속성 처리 // 변경 없음. 확인 완료.
+    <img src="asset/img/emoticon/80x/emo_phew.png" class="emoticon_small_size" alt=":한숨:">
+
+    // img 태그의 onload 속성 처리 // onload 속성 제거 확인 완료
+    <img src="asset/img/emoticon/80x/emo_phew.png" class="emoticon_small_size" alt=":한숨:" onload="window.alert('xss');">
+
+    // 이모티콘 img 외의 markdown string 을 통한 image 삽입 처리 // class, alt 속성이 존재하지 않는 모든 img 제거 처리 완료.
+    <img src="javascript:window.alert('xss');" class="emoticon_small_size" alt=":한숨:">
+    <img src="jav ascript:window.alert!('xss')" >
+    <img src=javascript:window.alert('xss')>
+    <img src="javascript:alert('XSS');">
+    <img src=javascript:alert('XSS')>
+    <img src=JaVaScRiPt:alert('XSS')>
+    <img src=javascript:alert(&quot;XSS&quot;)>
+    <img src=javascript:alert(String.fromCharCode(88,83,83))>
+    <img src=&#106;&#97;&#118;&#97;&#115;&#99;&#114;&#105;&#112;&#116;&#58;&#97;&#108;&#101;&#114;&#116;&#40;
+    &#39;&#88;&#83;&#83;&#39;&#41;>
+    <img src=&#0000106&#0000097&#0000118&#0000097&#0000115&#0000099&#0000114&#0000105&#0000112&#0000116&#0000058&#0000097&
+    #0000108&#0000101&#0000114&#0000116&#0000040&#0000039&#0000088&#0000083&#0000083&#0000039&#0000041>
+    <img src=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x27&#x58&#x53&#x53&#x27&#x29>
+    <img src="jav	ascript:alert('XSS');">
+    <img src="jav&#x09;ascript:alert('XSS');">
+    <img src="jav&#x0A;ascript:alert('XSS');">
+    <img src="jav&#x0D;ascript:alert('XSS');">
+    <img src=" &#14;  javascript:alert('XSS');">
+    <img src="javascript:alert('XSS')"
+    `;
+    console.log("testHtml :", testHtml);
+
+    // 모바일 디바이스나, pc 에서 마크다운 + 위지윅 편집기로 작성할 수 있는 컨텐츠는 아래와 같다.
+    // 일반 텍스트(normal, bold, italic, strikethrough, underline, image, code block, <pre>, url link, tag, ...)
+    // "![image](https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png)",
+    // "    code block",
+    // "```js",
+    // 'console.log("fenced code block");',
+    // "```",
+    // <pre><script>window.alert('xss');</script></pre>
+    // [link](https://nhnent.github.io/tui.editor/)
+    // <span style="color:#e11d21" class="javascript: window.alert('xss');">xss</span>
+
+    console.log(
+      "xss(testHtml) with options :",
+      xss(testHtml, {
+        /*
+        whiteList: {
+          a: ["href", "title", "target"]
+        },
+        */
+        // whiteList: {}, // empty, means filter out all tags
+        // stripIgnoreTag: true, // filter out all HTML not in the whilelist
+        // stripIgnoreTag: false,
+        // stripIgnoreTagBody: ["script"], // the script tag is a special case, we need to filter out its content
+        // allowCommentTag: false, // default. remove all comments
+        onTag: function(tag, html, options) {
+          // remove all <img> outside of emoticon
+          if (tag === "img") {
+            const isDefinedClass = /\sclass=/.test(html);
+            const isDefinedAlt = /\salt=/.test(html);
+            if (!isDefinedClass && !isDefinedAlt) {
+              // class, alt 속성이 없는 경우, emoticon img 로 간주할 수 없으므로 제거한다.
+              return "";
+            }
+          }
+        },
+        onTagAttr: function(tag, name, value, isWhiteAttr) {
+          if (name === "class" || name === "data" || name === "src") {
+            // escape attribute value by xss.friendlyAttrValue()
+            return `${name}="${xss.friendlyAttrValue(value)}"`;
+          }
+
+          // Return nothing, means keep the default handling measure
+        }
+        /*
+        onIgnoreTag: function(tag, html, options) {
+          if (tag.substr(0, 2) === "x-") {
+            // 여기서 언급된 태그의 attr 은 건드리지 않는다.
+            // do not filter its attributes
+            return html;
+          }
+        },
+        // 아래와 같이 작성하여 data-{} 속성들만 허용시킬 수 있다는 것을 알았다. 'ㅅ')!
+        onIgnoreTagAttr: function(tag, name, value, isWhiteAttr) {
+          if (name.substr(0, 5) === "data-") {
+            // escape its value using built-in escapeAttrValue function
+            return name + '="' + xss.escapeAttrValue(value) + '"';
+          }
+        }
+        */
+      })
+    );
+
+    return;
+
     if (_.state.isViewer) {
       // Viewer
       const viewer = this.viewerRef.current.getInstance();
@@ -432,7 +598,7 @@ class TestTUIEditor extends Component {
       console.log(`[View][3. get html. markdown => html] : //${html}//`);
 
       // 모바일 디바이스나, pc 에서 마크다운 + 위지윅 편집기로 작성할 수 있는 컨텐츠는 아래와 같다.
-      // 일반 텍스트(normal, bold, italic, del, h2, )
+      // 일반 텍스트(normal, bold, italic, strikethrough, underline, image, code block, <pre>, url link, tag, ...)
       // "![image](https://cloud.githubusercontent.com/assets/389021/16107646/9729e556-33d8-11e6-933f-5b09fa3a53bb.png)",
       // "    code block",
       // "```js",
