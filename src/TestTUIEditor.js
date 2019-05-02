@@ -339,6 +339,8 @@ class TestTUIEditor extends Component {
     <a href="javascript:window.alert('xss');">click me</a>
     <a href="http://naver.com">click me</a>
     <a href="https://www.google.com">click me</a>
+    <a href="%5chttps://www.google.com">click me</a>
+    <a href=" https://www.google.com ">click me</a>
 
     // 일반 iframe 의 src 설정 처리 // 확인 완료
     <iframe src="https://www.google.com" width="0" height="0" frameborder="0"></iframe>
