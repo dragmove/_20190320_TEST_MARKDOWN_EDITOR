@@ -61,6 +61,7 @@ function underline(state, silent) {
   }
 
   content = state.src.slice(start + 1, state.pos);
+  console.log("content :", content);
 
   // don't allow unescaped spaces/newlines inside
   if (content.match(/(^|[^\\])(\\\\)*\s/)) {
@@ -71,6 +72,8 @@ function underline(state, silent) {
   // found!
   state.posMax = state.pos;
   state.pos = start + 1;
+
+  console.log("state.pos, state.posMax :", state.pos, state.posMax);
 
   // Earlier we checked !silent, but this implementation does not need it
   token = state.push("u_open", "u", 1);
@@ -88,6 +91,6 @@ function underline(state, silent) {
   return true;
 }
 
-module.exports = function sup_plugin(md) {
+module.exports = function underline_plugin(md) {
   md.inline.ruler.after("emphasis", "underline", underline);
 };

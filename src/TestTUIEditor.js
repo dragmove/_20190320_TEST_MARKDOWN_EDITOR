@@ -247,11 +247,12 @@ class TestTUIEditor extends Component {
     }
 
     // TODO: test markdownit
-    // const str = "*he^llo^*\n*^wo^rld*\nfoo";
+    const str = "*he^llo^*\n*^wo^rld*\nfoo";
     // const str = "**h^e^*^llo^***\n***^w^o****rl*d\nfoo";
     // const str = "h**el*l^o^***\n***^worl^*^d^**\n**^f^o**o";
     // const str = "h~~ell~~o\n^world^\n^fo^o";
-    const str = "h~~ell~~o\n^world^\n^fo^o^^";
+    // const str = "h~~ell~~o\n^world^\n^fo^o^^";
+    // const str = "^hiper^";
 
     const md = Convertor.getMarkdownitRenderer();
     console.log("md :", md);
