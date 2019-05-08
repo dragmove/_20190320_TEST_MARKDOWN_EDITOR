@@ -162,6 +162,7 @@ class TestTUIEditor extends Component {
     console.log("Editor :", Editor);
 
     // set own extensions
+    /*
     Editor.defineExtension("emoticon", function() {
       console.log("emoticon extension");
 
@@ -193,6 +194,7 @@ class TestTUIEditor extends Component {
         return '<div id="' + wrapperId + '"></div>';
       });
     });
+    */
 
     _._editor = new Editor({
       el: document.querySelector("#editor"),
@@ -234,10 +236,9 @@ class TestTUIEditor extends Component {
         "emoticon"
       ]
     });
-    _._editor.setPlaceholder("oh yes");
+    _._editor.setPlaceholder("this is placeholder.");
 
-    console.log("_._editor :", _._editor);
-
+    /*
     function renderYoutube(wrapperId, youtubeId) {
       var el = document.querySelector("#" + wrapperId);
       el.innerHTML =
@@ -245,14 +246,15 @@ class TestTUIEditor extends Component {
         youtubeId +
         '"></iframe>';
     }
+    */
 
     // TODO: test markdownit
-    const str = "*he^llo^*\n*^wo^rld*\nfoo";
+    // const str = "*he^llo^*\n*^wo^rld*\nfoo";
     // const str = "**h^e^*^llo^***\n***^w^o****rl*d\nfoo";
     // const str = "h**el*l^o^***\n***^worl^*^d^**\n**^f^o**o";
     // const str = "h~~ell~~o\n^world^\n^fo^o";
     // const str = "h~~ell~~o\n^world^\n^fo^o^^";
-    // const str = "^hiper^";
+    const str = "hiper";
 
     const md = Convertor.getMarkdownitRenderer();
     console.log("md :", md);
