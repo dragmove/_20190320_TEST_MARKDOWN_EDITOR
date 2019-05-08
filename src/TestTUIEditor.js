@@ -11,6 +11,11 @@ import xss from "xss";
 
 // import table extension
 import "tui-editor/dist/tui-editor-extTable";
+import Convertor from "./lib/tui-editor/js/convertor";
+
+// TODO: markdown-it plugin
+import iterator from "./markdown-it-for-inline";
+import sup_plugin from "./markdown-it-underline";
 
 /*
 var content = [
@@ -63,8 +68,6 @@ var content = [
 */
 
 var content = [
-  "hello world"
-
   /*
   'javascript: window.alert("xss");', // 일반 텍스트 // xxx
 
@@ -92,7 +95,6 @@ var content = [
   `<a href="https://www.google.com" onerror="">google</a>`,
   `<a href="https://www.google.com" onload="">google</a>`
   */
-
   /*
   "test 입니다.",
   "<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>",
@@ -202,14 +204,14 @@ class TestTUIEditor extends Component {
         "heading",
         "underline", // TODO: Add custom underline
         "bold",
-        "italic"
+        "italic",
         // 'strike',
         // 'divider',
         // 'hr',
         // 'quote',
         // 'divider',
-        // 'ul',
-        // 'ol',
+        "ul",
+        "ol"
         // 'task',
         // 'indent',
         // 'outdent',
@@ -232,6 +234,7 @@ class TestTUIEditor extends Component {
         "emoticon"
       ]
     });
+    _._editor.setPlaceholder("oh yes");
 
     console.log("_._editor :", _._editor);
 
@@ -242,6 +245,44 @@ class TestTUIEditor extends Component {
         youtubeId +
         '"></iframe>';
     }
+
+    // TODO: test markdownit
+    // const str = "*he^llo^*\n*^wo^rld*\nfoo";
+    // const str = "**h^e^*^llo^***\n***^w^o****rl*d\nfoo";
+    // const str = "h**el*l^o^***\n***^worl^*^d^**\n**^f^o**o";
+    // const str = "h~~ell~~o\n^world^\n^fo^o";
+    const str = "h~~ell~~o\n^world^\n^fo^o^^";
+
+    const md = Convertor.getMarkdownitRenderer();
+    console.log("md :", md);
+    // TODO: + underline 구현 방법 : use sup_plugin
+    md.use(sup_plugin);
+
+    const html = md.render(str);
+
+    console.log("html :", html);
+
+    // TODO: + underline 구현 방법 : use markdown-it-for-inline
+    /*
+    md.use(iterator, "foo_replace", "text", function(tokens, idx) {
+      // https://github.com/markdown-it/markdown-it-for-inline
+      const content = tokens[idx].content;
+      const underlinedContent = content.replace(
+        /(\^)([^\^]+)(\^)/g,
+        "<u>$2</u>"
+      );
+      console.log("underlinedContent :", underlinedContent);
+
+      tokens[idx].content = underlinedContent;
+    });
+
+    const html = md
+      .render(str)
+      .replace(/&lt;u&gt;/g, "<u>")
+      .replace(/&lt;\/u&gt;/g, "</u>");
+
+    console.log("html :", html);
+    */
   }
 
   getEditor = () => {

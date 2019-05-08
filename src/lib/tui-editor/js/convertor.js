@@ -8,7 +8,6 @@ import MarkdownIt from "markdown-it";
 import toMark from "to-mark";
 
 import htmlSanitizer from "./htmlSanitizer";
-import underline from "./markdownItPlugins/markdownitUnderlinePlugin";
 import taskList from "./markdownItPlugins/markdownitTaskPlugin";
 import codeBlock from "./markdownItPlugins/markdownitCodeBlockPlugin";
 import code from "./markdownItPlugins/markdownitCodeRenderer";
@@ -19,7 +18,6 @@ import codeBackticks from "./markdownItPlugins/markdownitBackticksRenderer";
 import { linkAttribute } from "./markdownItPlugins/markdownitInlinePlugin";
 import codeBlockManager from "./codeBlockManager";
 
-// TODO: Add underline plugin
 const markdownitHighlight = new MarkdownIt({
   html: true,
   breaks: true,
@@ -28,17 +26,14 @@ const markdownitHighlight = new MarkdownIt({
   highlight(codeText, type) {
     return codeBlockManager.createCodeBlockHtml(type, codeText);
   }
-}).use(underline);
+});
 
-// TODO: Add underline plugin
 const markdownit = new MarkdownIt({
   html: true,
   breaks: true,
   quotes: "“”‘’",
   langPrefix: "lang-"
-}).use(underline);
-
-console.log(markdownit.renderInline("^underline^ *emphasis*"));
+});
 
 // markdownitHighlight
 markdownitHighlight.block.ruler.at("code", code);
