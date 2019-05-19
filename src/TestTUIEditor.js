@@ -159,6 +159,25 @@ class TestTUIEditor extends Component {
   componentDidMount() {
     const _ = this;
 
+    // TODO: test markdownit
+    // const str = "*he^llo^*\n*^wo^rld*\nfoo";
+    // const str = "**h^e^*^llo^***\n***^w^o****rl*d\nfoo";
+    // const str = "h**el*l^o^***\n***^worl^*^d^**\n**^f^o**o";
+    // const str = "h~~ell~~o\n^world^\n^fo^o";
+    // const str = "h~~ell~~o\n^world^\n^fo^o^^";
+    const str = "hel*lo wor*ld";
+
+    const md = Convertor.getMarkdownitRenderer();
+    console.log("md :", md);
+    // TODO: + underline 구현 방법 : use sup_plugin
+    md.use(sup_plugin);
+
+    const html = md.render(str);
+
+    console.log("html :", html);
+
+    return;
+
     console.log("Editor :", Editor);
 
     // set own extensions
@@ -247,23 +266,6 @@ class TestTUIEditor extends Component {
         '"></iframe>';
     }
     */
-
-    // TODO: test markdownit
-    // const str = "*he^llo^*\n*^wo^rld*\nfoo";
-    // const str = "**h^e^*^llo^***\n***^w^o****rl*d\nfoo";
-    // const str = "h**el*l^o^***\n***^worl^*^d^**\n**^f^o**o";
-    // const str = "h~~ell~~o\n^world^\n^fo^o";
-    // const str = "h~~ell~~o\n^world^\n^fo^o^^";
-    const str = "hiper";
-
-    const md = Convertor.getMarkdownitRenderer();
-    console.log("md :", md);
-    // TODO: + underline 구현 방법 : use sup_plugin
-    md.use(sup_plugin);
-
-    const html = md.render(str);
-
-    console.log("html :", html);
 
     // TODO: + underline 구현 방법 : use markdown-it-for-inline
     /*
