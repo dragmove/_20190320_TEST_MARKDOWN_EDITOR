@@ -32,7 +32,10 @@ const markdownit = new MarkdownIt({
 // const str = "h~~ell~~o\n^world^\n^fo^o";
 // const str = "h~~ell~~o\n^world^\n^fo^o^^";
 // const str = "**hel^lo wo^**^rld foo b^ar";
-const str = "**hel**^**lo wo**rld foo b^ar";
+// const str = "**hel**^**lo wo**rld foo b^ar";
+const str =
+  "***^If you load^*** *^script directly^* ^into the page^, without package system &nbsp; &nbsp; <br>";
+// const str = "***~~If you load~~*** *~~script directly~~* ~~into the page~~, without package system";
 
 let md = markdownit.use(underline_plugin);
 
@@ -66,6 +69,7 @@ for (let i = 0; i < state.length; i++) {
 
     inlineTokenHasChildren = parsedChildState[1];
     if (
+      !inlineTokenHasChildren || // TODO: Added this protection!!!
       !inlineTokenHasChildren.children ||
       inlineTokenHasChildren.children.length <= 0
     )
@@ -80,7 +84,7 @@ for (let i = 0; i < state.length; i++) {
     end = token.children.slice(tokenIndex + 1);
 
     token.children = start.concat(center, end);
-    console.log("token.children :", token.children);
+    // console.log("token.children :", token.children);
   }
 }
 console.log("new state :", state);
